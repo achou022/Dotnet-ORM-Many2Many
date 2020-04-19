@@ -1,0 +1,34 @@
+@model WeddingPlanner.Models.ViewModels.DashVM
+<h4 class="d-inline-block">Welcome to the Wedding Planner</h4> 
+<partial Name="~/Views/Account/LogoutBtnPartial.cshtml"/>
+<hr>
+<table class="table table-striped">
+    <tr>
+        <th>Wedding</th>
+        <th>Date</th>
+        <th>Guests</th>
+        <th>Action</th>
+    </tr>
+    @foreach (Wedding w in Model.AllWeddings)
+    {
+        <tr>
+            <td><a asp-action="Detail" asp-controller="Wedding" asp-route-id=@w.WeddingId>@w.Bride & @w.Groom</a></td>
+            <td>@w.Date</td>
+            <td>@w.RSVPs.Count</td>
+            @if(Model.loggedUser == w.CreatorId)
+            {
+                <td><a asp-action="DeleteWedding" asp-controller="Wedding" asp-route-id=@w.WeddingId class="btn btn-danger">Delete</a></td>
+            }
+            else if(w.RSVPs.Any(wedding => wedding.AttendeeId == Model.loggedUser))
+            {
+                <td><a asp-action="RemoveRSVP" asp-controller="Wedding" asp-route-id=@w.WeddingId class="btn btn-warning">Un-RSVP</a></td>
+            }
+            else
+            {
+                <td><a asp-action="AddRSVP" asp-controller="Wedding" asp-route-id=@w.WeddingId class="btn btn-success">RSVP</a></td>
+            }
+        </tr>
+    }
+</table>
+<hr>
+<a asp-action="New" asp-controller="Wedding" class="btn btn-success float-right">New Wedding</a>

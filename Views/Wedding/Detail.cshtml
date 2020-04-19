@@ -1,0 +1,17 @@
+@model Wedding
+<h4 class="d-inline-block">@Model.Bride and @Model.Groom's Wedding</h4>
+<partial Name="~/Views/Account/LogoutBtnPartial.cshtml"/>
+<partial Name="DashBtnPartial"/>
+<hr>
+<div class="card">
+    <div class="card-body">
+        Date: @Model.Date
+        <hr>
+        <ul>
+            @foreach (RSVP r in Model.RSVPs)
+            {
+                <li>@r.Attendee.LastName, @r.Attendee.FirstName</li>
+            }
+        </ul>
+    </div>
+</div>
