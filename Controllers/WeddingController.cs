@@ -41,6 +41,10 @@ namespace WeddingPlanner.Controllers
                 .Include(w => w.RSVPs)
                 .ThenInclude(rsvps => rsvps.Attendee)
                 .FirstOrDefault(w => w.WeddingId == id);
+            if(target == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View(target);
         }
 
@@ -72,7 +76,7 @@ namespace WeddingPlanner.Controllers
                         Groom = postData.Groom,
                         Date = postData.Date,
                         Location = postData.Location,
-                        CreatorId = loggedUser ?? default(int)
+                        CreatorId = (int)loggedUser
                     };
                     dbContext.Add(newWedding);
                     dbContext.SaveChanges();
@@ -80,29 +84,35 @@ namespace WeddingPlanner.Controllers
                 }
                 return RedirectToAction("Index", "Home");
             }
-            return View("New", postData);
+            return View("New");
         }
 
         [HttpGet]
-        public IActionResult DeleteWedding(string id)
+        public IActionResult DeleteWedding(int id)
         {
             if(HttpContext.Session.GetInt32("User")==null)
             {
                 return RedirectToAction("Index", "Home");
             }
-            Wedding target = dbContext.AllWeddings.FirstOrDefault(w => w.WeddingId.ToString() == id);
+            Wedding target = dbContext.AllWeddings.FirstOrDefault(w => w.WeddingId == id);
+            if(target == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             dbContext.AllWeddings.Remove(target);
             dbContext.SaveChanges();
             return RedirectToAction("DashBoard");
         }
 
+        [HttpGet]
         public IActionResult AddRSVP(int id)
         {
             if(HttpContext.Session.GetInt32("User")==null)
             {
                 return RedirectToAction("Index", "Home");
             }
-            int AttendeeId = HttpContext.Session.GetInt32("User") ?? default(int);
+            int AttendeeId = (int)HttpContext.Session.GetInt32("User");
+            // Check if already RSVP
             if(dbContext.AllRSVPs.Any(rsvp => rsvp.AttendeeId == AttendeeId && rsvp.WeddingId == id))
             {
                 return RedirectToAction("Index", "Home");
@@ -110,22 +120,28 @@ namespace WeddingPlanner.Controllers
             RSVP temp = new RSVP
             {
                 WeddingId=id,
-                AttendeeId=HttpContext.Session.GetInt32("User") ?? default(int)
+                AttendeeId=AttendeeId
             };
             dbContext.Add(temp);
             dbContext.SaveChanges();
             return RedirectToAction("DashBoard");
         }
 
+        [HttpGet]
         public IActionResult RemoveRSVP(int id)
         {
             if(HttpContext.Session.GetInt32("User")==null)
             {
                 return RedirectToAction("Index", "Home");
             }
-            int attendee = HttpContext.Session.GetInt32("User") ?? default(int);
+            int attendee = (int)HttpContext.Session.GetInt32("User");
             RSVP target = dbContext.AllRSVPs
                 .FirstOrDefault(rsvp => rsvp.AttendeeId == attendee && rsvp.WeddingId == id);
+            // error if target doesn't exist
+            if(target == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             dbContext.AllRSVPs.Remove(target);
             dbContext.SaveChanges();
             return RedirectToAction("DashBoard");
